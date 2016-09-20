@@ -43,7 +43,7 @@ IMP HFIntercept_msgForward_imp(Class aClass, SEL aSelector)
 ///================================================================
 #pragma mark - forwardInvocation implementation
 
-static void HFIntercept_oriForwardInvocation(id selfObj, SEL aSelector, NSInvocation * anInvocation)
+static void HFIntercept_oriForwardInvocation(__unsafe_unretained id selfObj, SEL aSelector, NSInvocation * anInvocation)
 {
     SEL anAliasForwardSel = HFIntercept_aliasSelector(aSelector);
     
@@ -61,7 +61,7 @@ static void HFIntercept_oriForwardInvocation(id selfObj, SEL aSelector, NSInvoca
     }
 }
 
-void HFIntercept_forwardInvocation(id selfObj, SEL aSelector, NSInvocation * anInvocation)
+void HFIntercept_forwardInvocation(__unsafe_unretained id selfObj, SEL aSelector, NSInvocation * anInvocation)
 {
     SEL anOriInvSel   = anInvocation.selector;
     SEL anAliasInvSel = HFIntercept_aliasSelector(anOriInvSel);

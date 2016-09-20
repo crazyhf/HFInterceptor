@@ -24,7 +24,7 @@ FOUNDATION_EXPORT IMP HFIntercept_msgForward_imp(Class aClass, SEL aSelector);
 ///================================================================
 #pragma mark - forwardInvocation implementation
 
-FOUNDATION_EXPORT void HFIntercept_forwardInvocation(id selfObj, SEL aSelector, NSInvocation * anInvocation);
+FOUNDATION_EXPORT void HFIntercept_forwardInvocation(__unsafe_unretained id selfObj, SEL aSelector, NSInvocation * anInvocation);
 
 
 ///================================================================
