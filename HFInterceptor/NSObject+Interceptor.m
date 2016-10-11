@@ -40,8 +40,8 @@
             && YES == class_addMethod(self,
                                       HFIntercept_aliasSelector(aSelector),
                                       anOriIMP, aTypeEncoding)) {
-            class_replaceMethod(self, aSelector, aMsgForwardIMP, aTypeEncoding);
-        }
+                class_replaceMethod(self, aSelector, aMsgForwardIMP, aTypeEncoding);
+            }
         
         [self swizzlingForwardInvocation];
     }
@@ -51,30 +51,50 @@
                  option:(HFInterceptOption)anOption
              usingBlock:(HFIntercept_block_t)usingBlock
 {
+    if (self == self.class) return;
+    
     Method anOriMethod = NULL;
     IMP    anOriIMP    = NULL;
     
-    if (NULL != (anOriMethod = class_getInstanceMethod(self.class, aSelector))
+    Class  aClass  = object_getClass(self);
+    
+    if (NULL != (anOriMethod = class_getInstanceMethod(aClass, aSelector))
         && NULL != (anOriIMP = method_getImplementation(anOriMethod)))
     {
         HFIntercept_setAssociateInfo(self, aSelector, anOption, usingBlock);
         
-        Class aClass = objc_allocateClassPair(self.class, HFIntercept_classAlias(self.class).UTF8String, 0);
-        objc_registerClassPair(aClass);
-        object_setClass(self, aClass);
+        NSString * anAliasName = HFIntercept_classAlias(self.class);
+        if (NO == [NSStringFromClass(aClass) isEqualToString:anAliasName])
+        {
+            Class anAliasClass = objc_getClass(anAliasName.UTF8String);
+            if (nil == anAliasClass)
+            {
+                anAliasClass = objc_allocateClassPair(aClass,
+                                                      anAliasName.UTF8String, 0);
+                objc_registerClassPair(anAliasClass);
+            }
+            
+            Class anOriClass = object_setClass(self, anAliasClass);
+            class_replaceMethod(anAliasClass,
+                                @selector(class),
+                                imp_implementationWithBlock(^(id self) { return anOriClass; }),
+                                "#@:");
+            
+            aClass = anAliasClass;
+        }
         
         const char * aTypeEncoding = method_getTypeEncoding(anOriMethod);
         
-        IMP aMsgForwardIMP = HFIntercept_msgForward_imp(self.class, aSelector);
+        IMP aMsgForwardIMP = HFIntercept_msgForward_imp(aClass, aSelector);
         
         if (anOriIMP != aMsgForwardIMP
-            && YES == class_addMethod(self.class,
+            && YES == class_addMethod(aClass,
                                       HFIntercept_aliasSelector(aSelector),
                                       anOriIMP, aTypeEncoding)) {
-            class_replaceMethod(self.class, aSelector, aMsgForwardIMP, aTypeEncoding);
-        }
+                class_replaceMethod(aClass, aSelector, aMsgForwardIMP, aTypeEncoding);
+            }
         
-        [self.class swizzlingForwardInvocation];
+        [aClass swizzlingForwardInvocation];
     }
 }
 
