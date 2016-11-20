@@ -69,25 +69,36 @@ void HFIntercept_forwardInvocation(__unsafe_unretained id selfObj, SEL aSelector
     anInvocation.selector = anAliasInvSel;
     
     HFInterceptObjList * insObjList = HFIntercept_getAssociateInfo(selfObj, anOriInvSel);
-    HFInterceptObjList * clsObjLsit = HFIntercept_getAssociateInfo(object_getClass(selfObj), anOriInvSel);
+    HFInterceptObjList * clsObjList = HFIntercept_getAssociateInfo(object_getClass(selfObj), anOriInvSel);
     
-    if (0 != insObjList.headList.count || 0 != clsObjLsit.headList.count) {
+    HFInterceptObjList * oriClsObjList = nil;
+    if ([selfObj class] != object_getClass(selfObj)) {
+        oriClsObjList = HFIntercept_getAssociateInfo([selfObj class], anOriInvSel);
+    }
+    
+    if (0 != insObjList.headList.count || 0 != clsObjList.headList.count || 0 != oriClsObjList.headList.count) {
         for (HFInterceptObj * anInterceptObj in insObjList.headList) {
             HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
         }
-        for (HFInterceptObj * anInterceptObj in clsObjLsit.headList) {
+        for (HFInterceptObj * anInterceptObj in clsObjList.headList) {
+            HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
+        }
+        for (HFInterceptObj * anInterceptObj in oriClsObjList.headList) {
             HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
         }
     }
     
     BOOL callOriForwardInv = YES;
     
-    if (0 != insObjList.replaceList.count || 0 != clsObjLsit.replaceList.count) {
+    if (0 != insObjList.replaceList.count || 0 != clsObjList.replaceList.count || 0 != oriClsObjList.replaceList.count) {
         callOriForwardInv = NO;
         for (HFInterceptObj * anInterceptObj in insObjList.replaceList) {
             HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
         }
-        for (HFInterceptObj * anInterceptObj in clsObjLsit.replaceList) {
+        for (HFInterceptObj * anInterceptObj in clsObjList.replaceList) {
+            HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
+        }
+        for (HFInterceptObj * anInterceptObj in oriClsObjList.replaceList) {
             HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
         }
     } else if (YES == class_respondsToSelector(object_getClass(selfObj), anAliasInvSel)) {
@@ -95,11 +106,14 @@ void HFIntercept_forwardInvocation(__unsafe_unretained id selfObj, SEL aSelector
         [anInvocation invoke];
     }
     
-    if (0 != insObjList.tailList.count || 0 != clsObjLsit.tailList.count) {
+    if (0 != insObjList.tailList.count || 0 != clsObjList.tailList.count || 0 != oriClsObjList.tailList.count) {
         for (HFInterceptObj * anInterceptObj in insObjList.tailList) {
             HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
         }
-        for (HFInterceptObj * anInterceptObj in clsObjLsit.tailList) {
+        for (HFInterceptObj * anInterceptObj in clsObjList.tailList) {
+            HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
+        }
+        for (HFInterceptObj * anInterceptObj in oriClsObjList.tailList) {
             HFIntercept_safeCallBlock(anInterceptObj.block, anInterceptObj.block(anInvocation));
         }
     }
