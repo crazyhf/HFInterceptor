@@ -48,7 +48,7 @@ static void HFIntercept_oriForwardInvocation(__unsafe_unretained id selfObj, SEL
     SEL anAliasForwardSel = HFIntercept_aliasSelector(aSelector);
     
     if (YES == class_respondsToSelector(object_getClass(selfObj), anAliasForwardSel)) {
-        NSMethodSignature * anAliasForwardSig = [selfObj methodSignatureForSelector:anAliasForwardSel];
+        NSMethodSignature * anAliasForwardSig = [object_getClass(selfObj) instanceMethodSignatureForSelector:anAliasForwardSel];
         NSInvocation * anAliasForwardInv = [NSInvocation invocationWithMethodSignature:anAliasForwardSig];
         
         anAliasForwardInv.target   = selfObj;
